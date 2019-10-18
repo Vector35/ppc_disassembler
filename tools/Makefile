@@ -11,6 +11,9 @@ gofer.so: gofer.cpp
 croot:
 	./gen_root_c.py > ../ppc_root.c
 
+cli: cli.c ../ppc_disassembler.a
+	gcc -I.. cli.c ../ppc_disassembler.a -o cli
+
 copcodes:
 	./gen_opcode_c.py 0 > ../ppc_opc_0.c
 	./gen_opcode_c.py 2 > ../ppc_opc_2.c
