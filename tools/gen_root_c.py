@@ -7,10 +7,19 @@ import sys
 from helpers import *
 syn2npattern = {}
 
+print('#include <stdint.h>')
+print('#include "disassembler.h"')
+print('')
+
 with open('npatterns.txt') as fp:
 	for line in fp.readlines():
 		(npattern, syntax) = re.match(r'^(................................) (.*)$', line).group(1,2)
 		syn2npattern[syntax] = npattern
+
+print('/* prototypes/declarations */')
+for syn in syn2npattern:
+	print('int %s(uint32_t insword, struct ppc_decoded *dec);' % syn2func(syn))
+print('')
 
 opcodes_valid = set()
 for opcode in range(len(syn2npattern)):
@@ -27,12 +36,13 @@ for opcode in range(len(syn2npattern)):
 	print('}\n')
 
 # main switch on [b31..b26]
-print('int ppc_decode(uint32_t iw, struct ppc_decoded *dec)')
+print('int ppc_decode(uint32_t insword, struct ppc_decoded *dec)')
 print('{')
 print('\tswitch((insword & 0xFC000000) >> 26) {')
 for i in sorted(opcodes_valid):
-	print('\t\tcase %d: return opcode_%d(insword, dec)' % (i, i))
+	print('\t\tcase %d: return opcode_%d(insword, dec);' % (i, i))
 print('\t}')
+print('\treturn -1;')
 print('}')
 
 # 

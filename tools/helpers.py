@@ -234,15 +234,25 @@ def syn2func(syn):
 def syn_get_operand_count(syn):
 	if not ' ' in syn:
 		return 0
-	operand_half = syn[syn.find(' '):]
-	operand_types = re.split(r'[,\(\)]+', syn)
+	operand_half = syn[syn.find(' ')+1:]
+	operand_types = re.split(r'[,\(\)\+\-\*]+', operand_half)
+	operand_types = list(filter(lambda x: x and (not x.isspace()), operand_types))
 	return len(operand_types)
 
 def syn_get_operand_type(syn, operand_index):
 	if not ' ' in syn:
 		return None
 	operand_half = syn[syn.find(' ')+1:]
-	operand_types = re.split(r'[,\(\)]+', operand_half)
+	operand_types = re.split(r'[,\(\)\-\+\*]+', operand_half)
+	operand_types = list(filter(lambda x: x and (not x.isspace()), operand_types))
+
+	if not operand_types[operand_index]:
+		print('original syn: %s' % syn)
+		print('operand_count: %d' % syn_get_operand_count(syn))
+		print('operand_index: %d' % operand_index)
+		print('operand_types: ', operand_types)
+		assert False
+
 	return operand_types[operand_index]
 
 def syn_get_operand_fmtstr(syn):
@@ -252,6 +262,9 @@ def syn_get_operand_fmtstr(syn):
 	operand_half = operand_half.replace('(', '_LPAREN_')
 	operand_half = operand_half.replace(')', '_RPAREN_')
 	operand_half = operand_half.replace(',', '_C_')
+	operand_half = operand_half.replace('-', '_NEG_')
+	operand_half = operand_half.replace('+', '_POS_')
+	operand_half = operand_half.replace('*', '_MUL_')
 	return operand_half
 
 def syn2fmtstr(syn):

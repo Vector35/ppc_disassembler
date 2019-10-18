@@ -38,7 +38,7 @@ with open('epatterns.txt') as fp:
 		(epattern, syntax) = re.match(r'^(................................) (.*)$', line).group(1,2)
 		syn2epattern[syntax] = epattern
 
-opcode = int(sys.argv[1], 16)
+opcode = int(sys.argv[1], 10)
 
 print('#include "disassembler.h"\n')
 
@@ -47,13 +47,13 @@ for (syn, epattern) in syn2epattern.items():
 		continue
 
 	print('/* %s */' % syn)
-	print('int %s(uint32_t insword, struct decoded *dec)' % syn2func(syn))
+	print('int %s(uint32_t insword, struct ppc_decoded *dec)' % syn2func(syn))
 	print('{')
 
 	# mnemonic and whether it's dotted
 	mnem_str = syn.split(' ')[0]
 	if mnem_str.endswith('.'):
-		print('\tdec->properties |= PPC_PROPERTY_DOTTED;' % syn_get_mnemonic_enum(syn))
+		print('\tdec->properties |= PPC_PROPERTY_DOTTED;');
 		mnem_str = mnem_str[0:-1]
 	print('\tdec->mnemonic = PPC_MNEM_%s;' % mnem_str.upper())
 
@@ -65,9 +65,9 @@ for (syn, epattern) in syn2epattern.items():
 		operand_types = [syn_get_operand_type(syn, i) for i in range(operand_count)]
 		operand_extractors = [epattern_to_extract(epattern, x) for x in 'ABCDEFGHI'[0:operand_count]]
 		for (i, ot) in enumerate(operand_types):
-			print('\tdec->operand_types[i] = PPC_OPER_TYPE_%s;' % operand_types[i])
+			print('\tdec->operand_types[%d] = PPC_OPER_TYPE_%s;' % (i, operand_types[i]))
 			if operand_extractors[i]:
-				print('\tdec->operand_values[i] = %s;' % operand_extractors[i])
+				print('\tdec->operand_values[%d] = %s;' % (i, operand_extractors[i]))
 
 	# format string
 	if operand_count:
