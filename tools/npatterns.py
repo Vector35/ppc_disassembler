@@ -64,7 +64,7 @@ for insword in range(start, end):
 	else:
 		syn2always1[syn] &= insword
 		syn2always0[syn] &= ~insword
-	
+
 for syn in syn2always1:
 	always0 = syn2always0[syn]
 	always1 = syn2always1[syn]
