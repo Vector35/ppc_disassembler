@@ -5,8 +5,8 @@ all: gofer.so
 
 .PHONY: croot copcode
 
-gofer.so: gofer.cpp
-	g++ $(CPPFLAGS)	$(BFDFLAGS) -shared -o gofer.so gofer.cpp -Wl,-headerpad_max_install_names
+gofer.so: gofer.cpp ../ppc_disassembler.a
+	g++ $(CPPFLAGS) -I.. $(BFDFLAGS) -shared -o gofer.so gofer.cpp  ../ppc_disassembler.a -Wl,-headerpad_max_install_names
 
 croot:
 	./gen_root_c.py > ../ppc_root.c

@@ -14,6 +14,12 @@ using namespace std;
 #include <bfd.h> // for bfd_arch_arm, etc.
 #include <dis-asm.h>
 
+/* binja disassembler stuff */
+extern "C"
+{
+#include "disassembler.h"
+}
+
 /*****************************************************************************/
 /* disassembler string making callback */
 /*****************************************************************************/
@@ -108,4 +114,9 @@ extern "C" int get_disasm_libopcodes(enum bfd_architecture arch, uint32_t mach, 
 	disasm((bfd_vma)addr, &dinfo);
 
 	return 0;
+}
+
+extern "C" int get_disasm_binja(uint32_t insword, char *result)
+{
+	return ppc_disassemble(insword, result);
 }

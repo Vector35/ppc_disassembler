@@ -58,10 +58,11 @@ gofer = None
 cbuf = None
 def disasm_data(data, addr=0, arch=bfd_arch_powerpc, mach=bfd_ppc_machine.ppc):
 	# initialize disassembler, if necessary
-	global gofer, cbuf
+	global gofer, cbuf, cbuf2
 	if not gofer:
 		gofer = ctypes.CDLL("gofer.so")
 		cbuf = ctypes.create_string_buffer(256)
+		cbuf2 = ctypes.create_string_buffer(256)
 
 	#print('arch:', arch)
 	#print('mach:', mach)
@@ -72,12 +73,35 @@ def disasm_data(data, addr=0, arch=bfd_arch_powerpc, mach=bfd_ppc_machine.ppc):
 	tmp = tmp.strip()
 	tmp = tmp.replace('\t', ' ')		
 	if tmp[0] == '.':
-		return ''
+		return None
 	return tmp
 
 def disasm_insword(insword, addr=0, arch=bfd_arch_powerpc, mach=bfd_ppc_machine.ppc):
 	data = struct.pack('>I', insword)
 	return disasm_data(data, addr, arch, mach)
+
+#******************************************************************************
+# binja disassembler
+#******************************************************************************
+
+def disasm_insword_binja(insword):
+	# initialize disassembler, if necessary
+	global gofer, cbuf, cbuf2
+	if not gofer:
+		gofer = ctypes.CDLL("gofer.so")
+		cbuf = ctypes.create_string_buffer(256)
+		cbuf2 = ctypes.create_string_buffer(256)
+
+	tmp = gofer.get_disasm_binja(insword, ctypes.byref(cbuf2))
+	if tmp:
+		return None
+	else:
+		tmp = cbuf2.value.decode('utf-8')
+		return tmp
+
+def disasm_data_binja(data):
+	insword = struct.unpack('>I', data)
+	return disasm_insword_binja(insword)
 
 #******************************************************************************
 # tokenizing

@@ -17,8 +17,11 @@ int main(int ac, char **av)
 	data[3] = insword & 0xFF;
 
 	char instxt[128];
-	ppc_disassemble(insword, instxt);
-	printf("%08X: %s\n", insword, instxt);
+	int rc = ppc_disassemble(insword, instxt);
+	if(rc)
+		printf("ERROR\n");
+	else
+		printf("%08X: %s\n", insword, instxt);
 
-	return 0;
+	return rc;
 }
