@@ -494,6 +494,8 @@ static int opcode_4(uint32_t insword, struct ppc_decoded *dec)
 	if((insword & 0xFC00043F)==0x1000002C) return vsldoi_VREG_VREG_VREG_NUM(insword, dec);
 	if((insword & 0xFC00007E)==0x1000000C) return psq_lx_FREG_GPR_GPR_NUM_NUM(insword, dec);
 	if((insword & 0xFC00007E)==0x1000000E) return psq_stx_FREG_GPR_GPR_NUM_NUM(insword, dec);
+	if((insword & 0xFC00007E)==0x1000004C) return psq_lux_FREG_GPR_GPR_NUM_NUM(insword, dec);
+	if((insword & 0xFC00007E)==0x1000004E) return psq_stux_FREG_GPR_GPR_NUM_NUM(insword, dec);
 	if((insword & 0xFC00003F)==0x10000014) return ps_sum0_FREG_FREG_FREG_FREG(insword, dec);
 	if((insword & 0xFC00003F)==0x10000015) return ps_sum0D_FREG_FREG_FREG_FREG(insword, dec);
 	if((insword & 0xFC00003F)==0x10000016) return ps_sum1_FREG_FREG_FREG_FREG(insword, dec);
@@ -528,8 +530,6 @@ static int opcode_4(uint32_t insword, struct ppc_decoded *dec)
 	if((insword & 0xFC00003F)==0x1000003D) return vaddecuq_VREG_VREG_VREG_VREG(insword, dec);
 	if((insword & 0xFC00003F)==0x1000003E) return vsubeuqm_VREG_VREG_VREG_VREG(insword, dec);
 	if((insword & 0xFC00003F)==0x1000003F) return vsubecuq_VREG_VREG_VREG_VREG(insword, dec);
-	if((insword & 0xFC00007E)==0x1000004C) return psq_lux_FREG_GPR_GPR_NUM_NUM(insword, dec);
-	if((insword & 0xFC00007E)==0x1000004E) return psq_stux_FREG_GPR_GPR_NUM_NUM(insword, dec);
 	return -1;
 }
 

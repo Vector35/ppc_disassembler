@@ -4,15 +4,15 @@
 int twi_NUM_GPR_NUM(uint32_t insword, struct ppc_decoded *dec)
 {
 	dec->mnemonic = PPC_MNEM_TWI;
-	/* 000011AAAAxBBBBBCCCCCCCCCCCCCCCC */
+	/* 000011AAAAABBBBBCCCCCCCCCCCCCCCC */
 	dec->operand_n = 3;
 	dec->operand_types[0] = PPC_OPER_TYPE_NUM;
-	dec->operand_values[0] = (insword & 0x3C00000)>>22;
+	dec->operand_values[0] = (insword & 0x3E00000)>>21;
 	dec->operand_types[1] = PPC_OPER_TYPE_GPR;
 	dec->operand_values[1] = (insword & 0x1F0000)>>16;
 	dec->operand_types[2] = PPC_OPER_TYPE_NUM;
 	dec->operand_values[2] = insword & 0xFFFF;
-	dec->operand_fmtstr = PPC_FMTSTR_NUM_C_GPR_C_NUM;
+	dec->operand_fmtstr = PPC_FMTSTR_DEC_C_GPR_C_INT16;
 	return 0;
 }
 
@@ -26,7 +26,7 @@ int twlgti_GPR_NUM(uint32_t insword, struct ppc_decoded *dec)
 	dec->operand_values[0] = (insword & 0x1F0000)>>16;
 	dec->operand_types[1] = PPC_OPER_TYPE_NUM;
 	dec->operand_values[1] = insword & 0xFFFF;
-	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_NUM;
+	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_INT16;
 	return 0;
 }
 
@@ -40,7 +40,7 @@ int twllti_GPR_NUM(uint32_t insword, struct ppc_decoded *dec)
 	dec->operand_values[0] = (insword & 0x1F0000)>>16;
 	dec->operand_types[1] = PPC_OPER_TYPE_NUM;
 	dec->operand_values[1] = insword & 0xFFFF;
-	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_NUM;
+	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_INT16;
 	return 0;
 }
 
@@ -54,7 +54,7 @@ int tweqi_GPR_NUM(uint32_t insword, struct ppc_decoded *dec)
 	dec->operand_values[0] = (insword & 0x1F0000)>>16;
 	dec->operand_types[1] = PPC_OPER_TYPE_NUM;
 	dec->operand_values[1] = insword & 0xFFFF;
-	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_NUM;
+	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_INT16;
 	return 0;
 }
 
@@ -68,7 +68,7 @@ int twlgei_GPR_NUM(uint32_t insword, struct ppc_decoded *dec)
 	dec->operand_values[0] = (insword & 0x1F0000)>>16;
 	dec->operand_types[1] = PPC_OPER_TYPE_NUM;
 	dec->operand_values[1] = insword & 0xFFFF;
-	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_NUM;
+	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_INT16;
 	return 0;
 }
 
@@ -82,7 +82,7 @@ int twllei_GPR_NUM(uint32_t insword, struct ppc_decoded *dec)
 	dec->operand_values[0] = (insword & 0x1F0000)>>16;
 	dec->operand_types[1] = PPC_OPER_TYPE_NUM;
 	dec->operand_values[1] = insword & 0xFFFF;
-	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_NUM;
+	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_INT16;
 	return 0;
 }
 
@@ -96,7 +96,7 @@ int twgti_GPR_NUM(uint32_t insword, struct ppc_decoded *dec)
 	dec->operand_values[0] = (insword & 0x1F0000)>>16;
 	dec->operand_types[1] = PPC_OPER_TYPE_NUM;
 	dec->operand_values[1] = insword & 0xFFFF;
-	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_NUM;
+	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_INT16;
 	return 0;
 }
 
@@ -110,7 +110,7 @@ int twgei_GPR_NUM(uint32_t insword, struct ppc_decoded *dec)
 	dec->operand_values[0] = (insword & 0x1F0000)>>16;
 	dec->operand_types[1] = PPC_OPER_TYPE_NUM;
 	dec->operand_values[1] = insword & 0xFFFF;
-	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_NUM;
+	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_INT16;
 	return 0;
 }
 
@@ -124,7 +124,7 @@ int twlti_GPR_NUM(uint32_t insword, struct ppc_decoded *dec)
 	dec->operand_values[0] = (insword & 0x1F0000)>>16;
 	dec->operand_types[1] = PPC_OPER_TYPE_NUM;
 	dec->operand_values[1] = insword & 0xFFFF;
-	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_NUM;
+	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_INT16;
 	return 0;
 }
 
@@ -138,7 +138,7 @@ int twlei_GPR_NUM(uint32_t insword, struct ppc_decoded *dec)
 	dec->operand_values[0] = (insword & 0x1F0000)>>16;
 	dec->operand_types[1] = PPC_OPER_TYPE_NUM;
 	dec->operand_values[1] = insword & 0xFFFF;
-	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_NUM;
+	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_INT16;
 	return 0;
 }
 
@@ -152,7 +152,7 @@ int twnei_GPR_NUM(uint32_t insword, struct ppc_decoded *dec)
 	dec->operand_values[0] = (insword & 0x1F0000)>>16;
 	dec->operand_types[1] = PPC_OPER_TYPE_NUM;
 	dec->operand_values[1] = insword & 0xFFFF;
-	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_NUM;
+	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_INT16;
 	return 0;
 }
 
@@ -166,7 +166,7 @@ int twui_GPR_NUM(uint32_t insword, struct ppc_decoded *dec)
 	dec->operand_values[0] = (insword & 0x1F0000)>>16;
 	dec->operand_types[1] = PPC_OPER_TYPE_NUM;
 	dec->operand_values[1] = insword & 0xFFFF;
-	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_NUM;
+	dec->operand_fmtstr = PPC_FMTSTR_GPR_C_INT16;
 	return 0;
 }
 

@@ -70,10 +70,10 @@ def disasm_data(data, addr=0, arch=bfd_arch_powerpc, mach=bfd_ppc_machine.ppc):
 	#print('data:', data)
 	gofer.get_disasm_libopcodes(arch, mach.value, addr, data, 4, ctypes.byref(cbuf))
 	tmp = cbuf.value.decode('utf-8')
-	tmp = tmp.strip()
-	tmp = tmp.replace('\t', ' ')		
 	if tmp[0] == '.':
 		return None
+	tmp = tmp.strip()
+	tmp = re.sub('\s+', ' ', tmp)
 	return tmp
 
 def disasm_insword(insword, addr=0, arch=bfd_arch_powerpc, mach=bfd_ppc_machine.ppc):

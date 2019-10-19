@@ -142,26 +142,6 @@ int vmrghb_VREG_VREG_VREG(uint32_t insword, struct ppc_decoded *dec)
 	return 0;
 }
 
-/* psq_lx FREG,GPR,GPR,NUM,NUM */
-int psq_lx_FREG_GPR_GPR_NUM_NUM(uint32_t insword, struct ppc_decoded *dec)
-{
-	dec->mnemonic = PPC_MNEM_PSQ_LX;
-	/* 000100AAAAABBBBBCCCCCDxxE000110x */
-	dec->operand_n = 5;
-	dec->operand_types[0] = PPC_OPER_TYPE_FREG;
-	dec->operand_values[0] = (insword & 0x3E00000)>>21;
-	dec->operand_types[1] = PPC_OPER_TYPE_GPR;
-	dec->operand_values[1] = (insword & 0x1F0000)>>16;
-	dec->operand_types[2] = PPC_OPER_TYPE_GPR;
-	dec->operand_values[2] = (insword & 0xF800)>>11;
-	dec->operand_types[3] = PPC_OPER_TYPE_NUM;
-	dec->operand_values[3] = (insword & 0x400)>>10;
-	dec->operand_types[4] = PPC_OPER_TYPE_NUM;
-	dec->operand_values[4] = (insword & 0x80)>>7;
-	dec->operand_fmtstr = PPC_FMTSTR_FREG_C_GPR_C_GPR_C_NUM_C_NUM;
-	return 0;
-}
-
 /* vpkuhum VREG,VREG,VREG */
 int vpkuhum_VREG_VREG_VREG(uint32_t insword, struct ppc_decoded *dec)
 {
@@ -178,11 +158,11 @@ int vpkuhum_VREG_VREG_VREG(uint32_t insword, struct ppc_decoded *dec)
 	return 0;
 }
 
-/* psq_stx FREG,GPR,GPR,NUM,NUM */
-int psq_stx_FREG_GPR_GPR_NUM_NUM(uint32_t insword, struct ppc_decoded *dec)
+/* psq_lx FREG,GPR,GPR,NUM,NUM */
+int psq_lx_FREG_GPR_GPR_NUM_NUM(uint32_t insword, struct ppc_decoded *dec)
 {
-	dec->mnemonic = PPC_MNEM_PSQ_STX;
-	/* 000100AAAAABBBBBCCCCCxEEE000111x */
+	dec->mnemonic = PPC_MNEM_PSQ_LX;
+	/* 000100AAAAABBBBBCCCCCDEEE0001100 */
 	dec->operand_n = 5;
 	dec->operand_types[0] = PPC_OPER_TYPE_FREG;
 	dec->operand_values[0] = (insword & 0x3E00000)>>21;
@@ -191,6 +171,67 @@ int psq_stx_FREG_GPR_GPR_NUM_NUM(uint32_t insword, struct ppc_decoded *dec)
 	dec->operand_types[2] = PPC_OPER_TYPE_GPR;
 	dec->operand_values[2] = (insword & 0xF800)>>11;
 	dec->operand_types[3] = PPC_OPER_TYPE_NUM;
+	dec->operand_values[3] = (insword & 0x400)>>10;
+	dec->operand_types[4] = PPC_OPER_TYPE_NUM;
+	dec->operand_values[4] = (insword & 0x380)>>7;
+	dec->operand_fmtstr = PPC_FMTSTR_FREG_C_GPR_C_GPR_C_NUM_C_NUM;
+	return 0;
+}
+
+/* psq_stx FREG,GPR,GPR,NUM,NUM */
+int psq_stx_FREG_GPR_GPR_NUM_NUM(uint32_t insword, struct ppc_decoded *dec)
+{
+	dec->mnemonic = PPC_MNEM_PSQ_STX;
+	/* 000100AAAAABBBBBCCCCCDEEE0001110 */
+	dec->operand_n = 5;
+	dec->operand_types[0] = PPC_OPER_TYPE_FREG;
+	dec->operand_values[0] = (insword & 0x3E00000)>>21;
+	dec->operand_types[1] = PPC_OPER_TYPE_GPR;
+	dec->operand_values[1] = (insword & 0x1F0000)>>16;
+	dec->operand_types[2] = PPC_OPER_TYPE_GPR;
+	dec->operand_values[2] = (insword & 0xF800)>>11;
+	dec->operand_types[3] = PPC_OPER_TYPE_NUM;
+	dec->operand_values[3] = (insword & 0x400)>>10;
+	dec->operand_types[4] = PPC_OPER_TYPE_NUM;
+	dec->operand_values[4] = (insword & 0x380)>>7;
+	dec->operand_fmtstr = PPC_FMTSTR_FREG_C_GPR_C_GPR_C_NUM_C_NUM;
+	return 0;
+}
+
+/* psq_lux FREG,GPR,GPR,NUM,NUM */
+int psq_lux_FREG_GPR_GPR_NUM_NUM(uint32_t insword, struct ppc_decoded *dec)
+{
+	dec->mnemonic = PPC_MNEM_PSQ_LUX;
+	/* 000100AAAAABBBBBCCCCCDEEE1001100 */
+	dec->operand_n = 5;
+	dec->operand_types[0] = PPC_OPER_TYPE_FREG;
+	dec->operand_values[0] = (insword & 0x3E00000)>>21;
+	dec->operand_types[1] = PPC_OPER_TYPE_GPR;
+	dec->operand_values[1] = (insword & 0x1F0000)>>16;
+	dec->operand_types[2] = PPC_OPER_TYPE_GPR;
+	dec->operand_values[2] = (insword & 0xF800)>>11;
+	dec->operand_types[3] = PPC_OPER_TYPE_NUM;
+	dec->operand_values[3] = (insword & 0x400)>>10;
+	dec->operand_types[4] = PPC_OPER_TYPE_NUM;
+	dec->operand_values[4] = (insword & 0x380)>>7;
+	dec->operand_fmtstr = PPC_FMTSTR_FREG_C_GPR_C_GPR_C_NUM_C_NUM;
+	return 0;
+}
+
+/* psq_stux FREG,GPR,GPR,NUM,NUM */
+int psq_stux_FREG_GPR_GPR_NUM_NUM(uint32_t insword, struct ppc_decoded *dec)
+{
+	dec->mnemonic = PPC_MNEM_PSQ_STUX;
+	/* 000100AAAAABBBBBCCCCCDxEE100111x */
+	dec->operand_n = 5;
+	dec->operand_types[0] = PPC_OPER_TYPE_FREG;
+	dec->operand_values[0] = (insword & 0x3E00000)>>21;
+	dec->operand_types[1] = PPC_OPER_TYPE_GPR;
+	dec->operand_values[1] = (insword & 0x1F0000)>>16;
+	dec->operand_types[2] = PPC_OPER_TYPE_GPR;
+	dec->operand_values[2] = (insword & 0xF800)>>11;
+	dec->operand_types[3] = PPC_OPER_TYPE_NUM;
+	dec->operand_values[3] = (insword & 0x400)>>10;
 	dec->operand_types[4] = PPC_OPER_TYPE_NUM;
 	dec->operand_values[4] = (insword & 0x380)>>7;
 	dec->operand_fmtstr = PPC_FMTSTR_FREG_C_GPR_C_GPR_C_NUM_C_NUM;
@@ -1120,26 +1161,6 @@ int vmrghh_VREG_VREG_VREG(uint32_t insword, struct ppc_decoded *dec)
 	return 0;
 }
 
-/* psq_lux FREG,GPR,GPR,NUM,NUM */
-int psq_lux_FREG_GPR_GPR_NUM_NUM(uint32_t insword, struct ppc_decoded *dec)
-{
-	dec->mnemonic = PPC_MNEM_PSQ_LUX;
-	/* 000100AAAAABBBBBCCCCCDxEE100110x */
-	dec->operand_n = 5;
-	dec->operand_types[0] = PPC_OPER_TYPE_FREG;
-	dec->operand_values[0] = (insword & 0x3E00000)>>21;
-	dec->operand_types[1] = PPC_OPER_TYPE_GPR;
-	dec->operand_values[1] = (insword & 0x1F0000)>>16;
-	dec->operand_types[2] = PPC_OPER_TYPE_GPR;
-	dec->operand_values[2] = (insword & 0xF800)>>11;
-	dec->operand_types[3] = PPC_OPER_TYPE_NUM;
-	dec->operand_values[3] = (insword & 0x400)>>10;
-	dec->operand_types[4] = PPC_OPER_TYPE_NUM;
-	dec->operand_values[4] = (insword & 0x180)>>7;
-	dec->operand_fmtstr = PPC_FMTSTR_FREG_C_GPR_C_GPR_C_NUM_C_NUM;
-	return 0;
-}
-
 /* vpkuwum VREG,VREG,VREG */
 int vpkuwum_VREG_VREG_VREG(uint32_t insword, struct ppc_decoded *dec)
 {
@@ -1153,26 +1174,6 @@ int vpkuwum_VREG_VREG_VREG(uint32_t insword, struct ppc_decoded *dec)
 	dec->operand_types[2] = PPC_OPER_TYPE_VREG;
 	dec->operand_values[2] = (insword & 0xF800)>>11;
 	dec->operand_fmtstr = PPC_FMTSTR_VREG_C_VREG_C_VREG;
-	return 0;
-}
-
-/* psq_stux FREG,GPR,GPR,NUM,NUM */
-int psq_stux_FREG_GPR_GPR_NUM_NUM(uint32_t insword, struct ppc_decoded *dec)
-{
-	dec->mnemonic = PPC_MNEM_PSQ_STUX;
-	/* 000100AAAAABBBBBCCCCCDxEE100111x */
-	dec->operand_n = 5;
-	dec->operand_types[0] = PPC_OPER_TYPE_FREG;
-	dec->operand_values[0] = (insword & 0x3E00000)>>21;
-	dec->operand_types[1] = PPC_OPER_TYPE_GPR;
-	dec->operand_values[1] = (insword & 0x1F0000)>>16;
-	dec->operand_types[2] = PPC_OPER_TYPE_GPR;
-	dec->operand_values[2] = (insword & 0xF800)>>11;
-	dec->operand_types[3] = PPC_OPER_TYPE_NUM;
-	dec->operand_values[3] = (insword & 0x400)>>10;
-	dec->operand_types[4] = PPC_OPER_TYPE_NUM;
-	dec->operand_values[4] = (insword & 0x180)>>7;
-	dec->operand_fmtstr = PPC_FMTSTR_FREG_C_GPR_C_GPR_C_NUM_C_NUM;
 	return 0;
 }
 

@@ -1684,20 +1684,22 @@ int ppc_disassemble(uint32_t insword, char *result)
 		return -1;
 
 	strcpy(result, mnem_to_str(dec.mnemonic));
-	
+	if(dec.properties & PPC_PROPERTY_DOTTED)
+		strcat(result, ".");
+
 	char buf[128] = {'\0'};
 	switch(dec.operand_fmtstr) {
 		case PPC_FMTSTR_GPR:
 			sprintf(buf, "r%d", dec.operand_values[0]);
 			break;
 		case PPC_FMTSTR_GPR_C_NUM_C_GPR:
-			sprintf(buf, "r%d,0x%X,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "r%d,%d,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_GPR_C_NUM_LPAREN_GPR_RPAREN_:
-			sprintf(buf, "r%d,0x%X(r%d)", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "r%d,%d(r%d)", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_GPR_C_GPR_C_NUM:
-			sprintf(buf, "r%d,r%d,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "r%d,r%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR__NEG_:
 			sprintf(buf, "-");
@@ -1712,25 +1714,25 @@ int ppc_disassemble(uint32_t insword, char *result)
 			sprintf(buf, "f%d,f%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR__POS_NUM_C_FLAG:
-			sprintf(buf, "+0x%X,flag_names[%d]", dec.operand_values[0], dec.operand_values[1]);
+			sprintf(buf, "+%d,flag_names[%d]", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_VREG_C_VREG:
 			sprintf(buf, "v%d,v%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_NUM_C_GPR_C_GPR:
-			sprintf(buf, "0x%X,r%d,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "%d,r%d,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_FLAG_C_NUM_MUL_CREG_POS_FLAG_C_NUM_MUL_CREG_POS_FLAG:
-			sprintf(buf, "flag_names[%d],0x%X*cr%d+flag_names[%d],0x%X*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4], dec.operand_values[5], dec.operand_values[6]);
+			sprintf(buf, "flag_names[%d],%d*cr%d+flag_names[%d],%d*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4], dec.operand_values[5], dec.operand_values[6]);
 			break;
 		case PPC_FMTSTR_FREG_C_NUM_LPAREN_GPR_RPAREN_:
-			sprintf(buf, "f%d,0x%X(r%d)", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "f%d,%d(r%d)", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_FREG_C_FREG_C_FREG_C_FREG:
 			sprintf(buf, "f%d,f%d,f%d,f%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
 			break;
 		case PPC_FMTSTR_FREG_C_NUM:
-			sprintf(buf, "f%d,0x%X", dec.operand_values[0], dec.operand_values[1]);
+			sprintf(buf, "f%d,%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_VSREG_C_VSREG_C_VSREG:
 			sprintf(buf, "vs%d,vs%d,vs%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
@@ -1739,10 +1741,10 @@ int ppc_disassemble(uint32_t insword, char *result)
 			sprintf(buf, "v%d,v%d,v%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR__NEG_CREG_C_NUM:
-			sprintf(buf, "-cr%d,0x%X", dec.operand_values[0], dec.operand_values[1]);
+			sprintf(buf, "-cr%d,%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR__POS_CREG_C_NUM:
-			sprintf(buf, "+cr%d,0x%X", dec.operand_values[0], dec.operand_values[1]);
+			sprintf(buf, "+cr%d,%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_VSREG_C_VSREG:
 			sprintf(buf, "vs%d,vs%d", dec.operand_values[0], dec.operand_values[1]);
@@ -1751,49 +1753,52 @@ int ppc_disassemble(uint32_t insword, char *result)
 			sprintf(buf, "f%d,r%d,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_FREG_C_NUM_C_GPR:
-			sprintf(buf, "f%d,0x%X,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "f%d,%d,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_FREG_C_GPR:
 			sprintf(buf, "f%d,r%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_NUM_MUL_CREG_POS_FLAG_C_NUM:
-			sprintf(buf, "0x%X*cr%d+flag_names[%d],0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
+			sprintf(buf, "%d*cr%d+flag_names[%d],%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
 			break;
 		case PPC_FMTSTR_FLAG_C_NUM:
-			sprintf(buf, "flag_names[%d],0x%X", dec.operand_values[0], dec.operand_values[1]);
+			sprintf(buf, "flag_names[%d],%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_GPR_C_NUM_LPAREN_NUM_RPAREN_:
-			sprintf(buf, "r%d,0x%X(0x%X)", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "r%d,%d(%d)", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_NUM_MUL_CREG_POS_FLAG:
-			sprintf(buf, "0x%X*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "%d*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR__POS_NUM_C_FLAG_C_NUM:
-			sprintf(buf, "+0x%X,flag_names[%d],0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "+%d,flag_names[%d],%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_NUM_C_FLAG_C_NUM:
-			sprintf(buf, "0x%X,flag_names[%d],0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "%d,flag_names[%d],%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_NUM_C_NUM_C_NUM:
-			sprintf(buf, "0x%X,0x%X,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "%d,%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_GPR_C_NUM_C_GPR_C_NUM:
-			sprintf(buf, "r%d,0x%X,r%d,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
+			sprintf(buf, "r%d,%d,r%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
 			break;
 		case PPC_FMTSTR__POS_:
 			sprintf(buf, "+");
 			break;
 		case PPC_FMTSTR_NUM_C_GPR_C_NUM:
-			sprintf(buf, "0x%X,r%d,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "%d,r%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			break;
+		case PPC_FMTSTR_DEC_C_GPR_C_INT:
+			sprintf(buf, "%d,r%d,%d", dec.operand_values[0], dec.operand_values[1], (int32_t)dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR__POS_NUM_C_NUM_MUL_CREG_POS_FLAG_C_NUM:
-			sprintf(buf, "+0x%X,0x%X*cr%d+flag_names[%d],0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
+			sprintf(buf, "+%d,%d*cr%d+flag_names[%d],%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
 			break;
 		case PPC_FMTSTR_VREG_C_NUM:
-			sprintf(buf, "v%d,0x%X", dec.operand_values[0], dec.operand_values[1]);
+			sprintf(buf, "v%d,%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_NUM:
-			sprintf(buf, "0x%X", dec.operand_values[0]);
+			sprintf(buf, "%d", dec.operand_values[0]);
 			break;
 		case PPC_FMTSTR_VREG_C_VREG_C_VREG_C_VREG:
 			sprintf(buf, "v%d,v%d,v%d,v%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
@@ -1802,22 +1807,22 @@ int ppc_disassemble(uint32_t insword, char *result)
 			sprintf(buf, "cr%d,vs%d,vs%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_GPR_C_NUM:
-			sprintf(buf, "r%d,0x%X", dec.operand_values[0], dec.operand_values[1]);
+			sprintf(buf, "r%d,%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_NUM_MUL_CREG_POS_FLAG_C_NUM_MUL_CREG_POS_FLAG_C_FLAG:
-			sprintf(buf, "0x%X*cr%d+flag_names[%d],0x%X*cr%d+flag_names[%d],flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4], dec.operand_values[5], dec.operand_values[6]);
+			sprintf(buf, "%d*cr%d+flag_names[%d],%d*cr%d+flag_names[%d],flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4], dec.operand_values[5], dec.operand_values[6]);
 			break;
 		case PPC_FMTSTR_GPR_C_GPR_C_GPR_C_NUM_C_NUM:
-			sprintf(buf, "r%d,r%d,r%d,0x%X,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
+			sprintf(buf, "r%d,r%d,r%d,%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
 			break;
 		case PPC_FMTSTR_VREG_C_GPR_C_GPR:
 			sprintf(buf, "v%d,r%d,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR__NEG_NUM_C_NUM_MUL_CREG_POS_FLAG:
-			sprintf(buf, "-0x%X,0x%X*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
+			sprintf(buf, "-%d,%d*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
 			break;
 		case PPC_FMTSTR__NEG_NUM:
-			sprintf(buf, "-0x%X", dec.operand_values[0]);
+			sprintf(buf, "-%d", dec.operand_values[0]);
 			break;
 		case PPC_FMTSTR_FLAG_C_FLAG_C_FLAG:
 			sprintf(buf, "flag_names[%d],flag_names[%d],flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
@@ -1826,28 +1831,28 @@ int ppc_disassemble(uint32_t insword, char *result)
 			sprintf(buf, "f%d,f%d,f%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_FREG_C_FREG_C_NUM:
-			sprintf(buf, "f%d,f%d,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "f%d,f%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_FLAG_C_FLAG:
 			sprintf(buf, "flag_names[%d],flag_names[%d]", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_VREG_C_VREG_C_NUM:
-			sprintf(buf, "v%d,v%d,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "v%d,v%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_CREG_C_NUM:
-			sprintf(buf, "cr%d,0x%X", dec.operand_values[0], dec.operand_values[1]);
+			sprintf(buf, "cr%d,%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_VSREG_C_VSREG_C_VSREG_C_NUM:
-			sprintf(buf, "vs%d,vs%d,vs%d,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
+			sprintf(buf, "vs%d,vs%d,vs%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
 			break;
 		case PPC_FMTSTR__POS_CREG:
 			sprintf(buf, "+cr%d", dec.operand_values[0]);
 			break;
 		case PPC_FMTSTR_NUM_C_FREG_C_FREG:
-			sprintf(buf, "0x%X,f%d,f%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "%d,f%d,f%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR__POS_NUM:
-			sprintf(buf, "+0x%X", dec.operand_values[0]);
+			sprintf(buf, "+%d", dec.operand_values[0]);
 			break;
 		case PPC_FMTSTR_FLAG:
 			sprintf(buf, "flag_names[%d]", dec.operand_values[0]);
@@ -1856,7 +1861,7 @@ int ppc_disassemble(uint32_t insword, char *result)
 			sprintf(buf, "vs%d,r%d,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_NUM_C_GPR:
-			sprintf(buf, "0x%X,r%d", dec.operand_values[0], dec.operand_values[1]);
+			sprintf(buf, "%d,r%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_GPR_C_GPR_C_VREG:
 			sprintf(buf, "r%d,r%d,v%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
@@ -1865,64 +1870,64 @@ int ppc_disassemble(uint32_t insword, char *result)
 			sprintf(buf, "-cr%d", dec.operand_values[0]);
 			break;
 		case PPC_FMTSTR__NEG_NUM_C_NUM_MUL_CREG_POS_FLAG_C_NUM:
-			sprintf(buf, "-0x%X,0x%X*cr%d+flag_names[%d],0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
+			sprintf(buf, "-%d,%d*cr%d+flag_names[%d],%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
 			break;
 		case PPC_FMTSTR_FREG_C_FREG_C_FREG_C_NUM:
-			sprintf(buf, "f%d,f%d,f%d,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
+			sprintf(buf, "f%d,f%d,f%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
 			break;
 		case PPC_FMTSTR_CREG:
 			sprintf(buf, "cr%d", dec.operand_values[0]);
 			break;
 		case PPC_FMTSTR_GPR_C_GPR_C_NUM_C_NUM_C_NUM:
-			sprintf(buf, "r%d,r%d,0x%X,0x%X,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
+			sprintf(buf, "r%d,r%d,%d,%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
 			break;
 		case PPC_FMTSTR_FREG_C_NUM_LPAREN_NUM_RPAREN_:
-			sprintf(buf, "f%d,0x%X(0x%X)", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "f%d,%d(%d)", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_FLAG_C_NUM_MUL_CREG_POS_FLAG_C_FLAG:
-			sprintf(buf, "flag_names[%d],0x%X*cr%d+flag_names[%d],flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
+			sprintf(buf, "flag_names[%d],%d*cr%d+flag_names[%d],flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
 			break;
 		case PPC_FMTSTR_CREG_C_NUM_C_GPR_C_GPR:
-			sprintf(buf, "cr%d,0x%X,r%d,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
+			sprintf(buf, "cr%d,%d,r%d,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
 			break;
 		case PPC_FMTSTR_NUM_MUL_CREG_POS_FLAG_C_NUM_MUL_CREG_POS_FLAG_C_NUM_MUL_CREG_POS_FLAG:
-			sprintf(buf, "0x%X*cr%d+flag_names[%d],0x%X*cr%d+flag_names[%d],0x%X*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4], dec.operand_values[5], dec.operand_values[6], dec.operand_values[7], dec.operand_values[8]);
+			sprintf(buf, "%d*cr%d+flag_names[%d],%d*cr%d+flag_names[%d],%d*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4], dec.operand_values[5], dec.operand_values[6], dec.operand_values[7], dec.operand_values[8]);
 			break;
 		case PPC_FMTSTR__POS_NUM_C_NUM_MUL_CREG_POS_FLAG:
-			sprintf(buf, "+0x%X,0x%X*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
+			sprintf(buf, "+%d,%d*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
 			break;
 		case PPC_FMTSTR_VSREG_C_NUM_C_GPR:
-			sprintf(buf, "vs%d,0x%X,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "vs%d,%d,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_VSREG_C_NUM_LPAREN_NUM_RPAREN_:
-			sprintf(buf, "vs%d,0x%X(0x%X)", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "vs%d,%d(%d)", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_CREG_C_NUM_C_FREG:
-			sprintf(buf, "cr%d,0x%X,f%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "cr%d,%d,f%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_GPR_C_GPR_C_NUM_C_NUM:
-			sprintf(buf, "r%d,r%d,0x%X,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
+			sprintf(buf, "r%d,r%d,%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
 			break;
 		case PPC_FMTSTR__NEG_NUM_C_FLAG:
-			sprintf(buf, "-0x%X,flag_names[%d]", dec.operand_values[0], dec.operand_values[1]);
+			sprintf(buf, "-%d,flag_names[%d]", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_VREG_C_NUM_C_GPR:
-			sprintf(buf, "v%d,0x%X,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "v%d,%d,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR__POS_NUM_MUL_CREG_POS_FLAG:
-			sprintf(buf, "+0x%X*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "+%d*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_VSREG_C_VSREG_C_NUM:
-			sprintf(buf, "vs%d,vs%d,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "vs%d,vs%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_VSREG_C_NUM:
-			sprintf(buf, "vs%d,0x%X", dec.operand_values[0], dec.operand_values[1]);
+			sprintf(buf, "vs%d,%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_FCREG_C_GPR_C_GPR:
 			sprintf(buf, "Fcr%d,r%d,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_NUM_C_NUM_MUL_CREG_POS_FLAG_C_NUM:
-			sprintf(buf, "0x%X,0x%X*cr%d+flag_names[%d],0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
+			sprintf(buf, "%d,%d*cr%d+flag_names[%d],%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
 			break;
 		case PPC_FMTSTR_VREG:
 			sprintf(buf, "v%d", dec.operand_values[0]);
@@ -1931,52 +1936,52 @@ int ppc_disassemble(uint32_t insword, char *result)
 			sprintf(buf, "cr%d,f%d,f%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_NUM_MUL_CREG_POS_FLAG_C_NUM_MUL_CREG_POS_FLAG:
-			sprintf(buf, "0x%X*cr%d+flag_names[%d],0x%X*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4], dec.operand_values[5]);
+			sprintf(buf, "%d*cr%d+flag_names[%d],%d*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4], dec.operand_values[5]);
 			break;
 		case PPC_FMTSTR_GPR_C_VREG:
 			sprintf(buf, "r%d,v%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_VREG_C_VREG_C_VREG_C_NUM:
-			sprintf(buf, "v%d,v%d,v%d,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
+			sprintf(buf, "v%d,v%d,v%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
 			break;
 		case PPC_FMTSTR_CREG_C_FREG_C_NUM:
-			sprintf(buf, "cr%d,f%d,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "cr%d,f%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_VREG_C_NUM_LPAREN_GPR_RPAREN_:
-			sprintf(buf, "v%d,0x%X(r%d)", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "v%d,%d(r%d)", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_CREG_C_GPR_C_GPR:
 			sprintf(buf, "cr%d,r%d,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_VSREG_C_NUM_LPAREN_GPR_RPAREN_:
-			sprintf(buf, "vs%d,0x%X(r%d)", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "vs%d,%d(r%d)", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_NUM_MUL_CREG_POS_FLAG_C_FLAG_C_NUM_MUL_CREG_POS_FLAG:
-			sprintf(buf, "0x%X*cr%d+flag_names[%d],flag_names[%d],0x%X*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4], dec.operand_values[5], dec.operand_values[6]);
+			sprintf(buf, "%d*cr%d+flag_names[%d],flag_names[%d],%d*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4], dec.operand_values[5], dec.operand_values[6]);
 			break;
 		case PPC_FMTSTR_CREG_C_GPR_C_NUM:
-			sprintf(buf, "cr%d,r%d,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "cr%d,r%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_NUM_C_FREG_C_FREG_C_NUM:
-			sprintf(buf, "0x%X,f%d,f%d,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
+			sprintf(buf, "%d,f%d,f%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
 			break;
 		case PPC_FMTSTR_GPR_C_GPR_C_GPR_C_NUM:
-			sprintf(buf, "r%d,r%d,r%d,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
+			sprintf(buf, "r%d,r%d,r%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
 			break;
 		case PPC_FMTSTR_NUM_C_NUM:
-			sprintf(buf, "0x%X,0x%X", dec.operand_values[0], dec.operand_values[1]);
+			sprintf(buf, "%d,%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_CREG_C_VSREG_C_NUM:
-			sprintf(buf, "cr%d,vs%d,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "cr%d,vs%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_GPR_C_VSREG:
 			sprintf(buf, "r%d,vs%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_NUM_MUL_CREG_POS_FLAG_C_FLAG:
-			sprintf(buf, "0x%X*cr%d+flag_names[%d],flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
+			sprintf(buf, "%d*cr%d+flag_names[%d],flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
 			break;
 		case PPC_FMTSTR_FREG_C_NUM_LPAREN_GPR_RPAREN__C_NUM_C_NUM:
-			sprintf(buf, "f%d,0x%X(r%d),0x%X,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
+			sprintf(buf, "f%d,%d(r%d),%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
 			break;
 		case PPC_FMTSTR__POS_FLAG:
 			sprintf(buf, "+flag_names[%d]", dec.operand_values[0]);
@@ -1985,10 +1990,10 @@ int ppc_disassemble(uint32_t insword, char *result)
 			sprintf(buf, "r%d,f%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_NUM_MUL_CREG_POS_FLAG_C_FLAG_C_FLAG:
-			sprintf(buf, "0x%X*cr%d+flag_names[%d],flag_names[%d],flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
+			sprintf(buf, "%d*cr%d+flag_names[%d],flag_names[%d],flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
 			break;
 		case PPC_FMTSTR_NUM_C_NUM_C_GPR:
-			sprintf(buf, "0x%X,0x%X,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "%d,%d,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_CREG_C_FREG:
 			sprintf(buf, "cr%d,f%d", dec.operand_values[0], dec.operand_values[1]);
@@ -1997,28 +2002,28 @@ int ppc_disassemble(uint32_t insword, char *result)
 			sprintf(buf, "r%d,r%d,r%d,r%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
 			break;
 		case PPC_FMTSTR_FREG_C_GPR_C_GPR_C_NUM_C_NUM:
-			sprintf(buf, "f%d,r%d,r%d,0x%X,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
+			sprintf(buf, "f%d,r%d,r%d,%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
 			break;
 		case PPC_FMTSTR_GPR_C_NUM_C_NUM:
-			sprintf(buf, "r%d,0x%X,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "r%d,%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_FLAG_C_NUM_MUL_CREG_POS_FLAG:
-			sprintf(buf, "flag_names[%d],0x%X*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
+			sprintf(buf, "flag_names[%d],%d*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
 			break;
 		case PPC_FMTSTR_VREG_C_GPR:
 			sprintf(buf, "v%d,r%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_FLAG_C_FLAG_C_NUM_MUL_CREG_POS_FLAG:
-			sprintf(buf, "flag_names[%d],flag_names[%d],0x%X*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
+			sprintf(buf, "flag_names[%d],flag_names[%d],%d*cr%d+flag_names[%d]", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3], dec.operand_values[4]);
 			break;
 		case PPC_FMTSTR__NEG_NUM_C_FLAG_C_NUM:
-			sprintf(buf, "-0x%X,flag_names[%d],0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "-%d,flag_names[%d],%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_VSREG_C_GPR:
 			sprintf(buf, "vs%d,r%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_VREG_C_NUM_LPAREN_NUM_RPAREN_:
-			sprintf(buf, "v%d,0x%X(0x%X)", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "v%d,%d(%d)", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_FREG:
 			sprintf(buf, "f%d", dec.operand_values[0]);
@@ -2027,16 +2032,16 @@ int ppc_disassemble(uint32_t insword, char *result)
 			sprintf(buf, "cr%d,v%d,v%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_NUM_C_FREG:
-			sprintf(buf, "0x%X,f%d", dec.operand_values[0], dec.operand_values[1]);
+			sprintf(buf, "%d,f%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_CREG_C_VREG_C_NUM:
-			sprintf(buf, "cr%d,v%d,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
+			sprintf(buf, "cr%d,v%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2]);
 			break;
 		case PPC_FMTSTR_NUM_C_FREG_C_NUM_C_NUM:
-			sprintf(buf, "0x%X,f%d,0x%X,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
+			sprintf(buf, "%d,f%d,%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
 			break;
 		case PPC_FMTSTR_NUM_C_VREG_C_VREG_C_NUM:
-			sprintf(buf, "0x%X,v%d,v%d,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
+			sprintf(buf, "%d,v%d,v%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
 			break;
 		case PPC_FMTSTR_CREG_C_VSREG:
 			sprintf(buf, "cr%d,vs%d", dec.operand_values[0], dec.operand_values[1]);
@@ -2048,10 +2053,16 @@ int ppc_disassemble(uint32_t insword, char *result)
 			sprintf(buf, "r%d,cr%d", dec.operand_values[0], dec.operand_values[1]);
 			break;
 		case PPC_FMTSTR_VREG_C_VREG_C_NUM_C_NUM:
-			sprintf(buf, "v%d,v%d,0x%X,0x%X", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
+			sprintf(buf, "v%d,v%d,%d,%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
 			break;
 		case PPC_FMTSTR_VSREG_C_VSREG_C_VSREG_C_VSREG:
 			sprintf(buf, "vs%d,vs%d,vs%d,vs%d", dec.operand_values[0], dec.operand_values[1], dec.operand_values[2], dec.operand_values[3]);
+			break;
+		case PPC_FMTSTR_GPR_C_INT16:
+			sprintf(buf, "r%d,%d", dec.operand_values[0], (int16_t)dec.operand_values[1]);
+			break;
+		case PPC_FMTSTR_DEC_C_GPR_C_INT16:
+			sprintf(buf, "%d,r%d,%d", dec.operand_values[0], dec.operand_values[1], (int16_t)dec.operand_values[2]);
 			break;
 		default:
 			break;
